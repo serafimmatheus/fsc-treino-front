@@ -8,12 +8,12 @@ alwaysApply: true
 - Quando necessário, crie componentes e funções reutilizáveis para reduzir a duplicidade de código.
 - **NUNCA** crie mais de um componente no mesmo arquivo. Cada componente deve ter seu próprio arquivo.
 - Antes de criar um novo componente, **SEMPRE** use Context7 para verificar se já existe um componente do shadcn/ui que possa ser utilizado. Caso exista, instale-o.
-- **SEMPRE** use o componente `Button` do shadcn/ui (`@/components/ui/button`) para botões. **NUNCA** use `<button>` nativo diretamente.
+- **SEMPRE** use o componente `Button` do shadcn/ui (`@/app/_components/ui/button`) para botões. **NUNCA** use `<button>` nativo diretamente.
 
 ## Formulários
 
 - SEMPRE use Zod para validação de formulários.
-- Sempre use React Hook Form para criação e validação de formulários. SEMPRE use o componente @components/ui/form.tsx para criar formulários.
+- Sempre use React Hook Form para criação e validação de formulários. SEMPRE use o componente `@/app/_components/ui/form.tsx` para criar formulários.
 
 Exemplo de formulário:
 
@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/_components/ui/button";
 import {
   Form,
   FormControl,
@@ -32,8 +32,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/app/_components/ui/form";
+import { Input } from "@/app/_components/ui/input";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -67,9 +67,9 @@ export function ProfileForm() {
 
 ## Estilização
 
-- **NUNCA** use cores hard-coded do Tailwind (como `text-white`, `text-white/70`, `bg-black`, `bg-white`, `text-black`, `border-[#f1f1f1]`, `bg-[#2b54ff]`, `bg-[oklch(...)]` etc.). **SEMPRE** use as cores do tema definidas em @app/globals.css (ex: `text-background`, `text-background/70`, `bg-foreground`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `border-border` etc.). Caso a cor necessária não exista no tema, crie uma nova variável CSS em @app/globals.css seguindo o padrão existente.
+- **NUNCA** use cores hard-coded do Tailwind (como `text-white`, `text-white/70`, `bg-black`, `bg-white`, `text-black`, `border-[#f1f1f1]`, `bg-[#2b54ff]`, `bg-[oklch(...)]` etc.). **SEMPRE** use as cores do tema definidas em `app/(home)/globals.css` (ex.: `text-background`, `text-background/70`, `bg-foreground`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `border-border`). Caso a cor necessária não exista no tema, crie uma nova variável CSS em `app/(home)/globals.css` seguindo o padrão existente.
 - Antes de criar uma nova variável de cor, **SEMPRE** busque na documentação do shadcn/ui sobre theming e veja se realmente é necessário.
-- **SEMPRE** veja os componentes que podem ser reutilizados para construção de uma página em @components/ui/page.tsx.
+- Antes de montar uma página do zero, **revise** `app/_components/ui/` por componentes já instalados (shadcn) que encaixem no layout.
 
 ## Autenticação
 

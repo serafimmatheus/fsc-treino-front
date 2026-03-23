@@ -2,85 +2,61 @@
 alwaysApply: true
 ---
 
-Usamos as seguintes ferramentas para interagir com a API do projeto:
+## Ferramentas
 
-- Orval (https://orval.dev/) para gerar funções e tipos
-- TanStack Query (integrado com o Orval)
+- **Orval** gera funções e tipos a partir do OpenAPI.
+- **TanStack Query**: use apenas se o projeto passar a gerar hooks React Query no Orval (bloco **`rc`** em **`orval.config.ts`** — hoje **comentado**).
 
-## Regras
+## Regras gerais
 
 - **EVITE** transformar páginas inteiras em Client Components.
-- Prefira fazer o fetching de dados em Server Components sempre que possível.
-- **SEMPRE** Use as funções presentes em @lib/api/generated para fazer fetching de dados em Client Components.
-- **SEMPRE** use TanStack Query Query para fazer todo data fetching no client-side (Client Components) e, para isso, **SEMPRE** use os hooks presentes em @lib/api/generated.
-- Caso você precise de uma função que não está presente em @lib/api/generated, execute o comando `npx orval` para gerar os arquivos novamente. Caso a função ainda não esteja presente após a execução do comando, INTERROMPA a sua resposta e avise o usuário.
-- Ao chamar o `authClient`, **NUNCA** o coloque dentro de um `try, catch`. **SEMPRE** faça o destructuring do `error` que vem do seu resultado e trate isso corretamente. Exemplo: `const { error } = await authClient.changePassword({})`
-- **SEMPRE** chame a variação síncrona da mutation ao usar hooks de @lib/api/generated. Nesses casos, **SEMPRE** lide com o casso de sucesso e erro por meio dos parâmetros `onError` e `onSuccess`. Exemplo:
+- Prefira **fetch no servidor** (Server Components) sempre que couber.
+- Ao chamar **`authClient`**, **NUNCA** use `try/catch` em volta da chamada inteira; use o **`error`** (e **`data`**) retornados e trate de forma explícita. Exemplo: `const { data, error } = await authClient.getSession(...)`.
 
-  ```tsx
-  const { mutateAsync: createGateway, isPending: isCreating } =
-    useCreateStorePaymentGatewayIntegration();
+## API gerada — estado atual deste repo
 
-  const onSubmit = (payload) => {
-    createCondition(
-      {
-        storeId,
-        data: payload,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Configuração de frete criada com sucesso!");
-          queryClient.invalidateQueries({
-            queryKey: getGetStoreShippingCostConditionsQueryKey(storeId),
-          });
-          onClose();
-        },
-        onError: (error) => {
-          if (
-            error.response?.data.code === "ShippingCostConditionConflictError"
-          ) {
-            return toast.error(
-              "Já existe uma configuração de frete ativa para este período.",
-            );
-          }
-          const errorMessage =
-            error?.response?.data?.message ||
-            "Erro ao criar configuração de frete.";
-          toast.error(errorMessage);
-        },
-      },
-    );
-  };
-  ```
+- **Server-side / funções `fetch`**: **SEMPRE** use as funções exportadas de **`app/_lib/api/fetch-generated/index.ts`** (import **`@/app/_lib/api/fetch-generated`** ou caminho equivalente com `@/`).
+- O mutator é **`customFetch`** em **`app/_lib/fetch.ts`** (cookies, base URL a partir de **`NEXT_PUBLIC_BETTER_AUTH_URL`**).
+- Resposta: objeto com **`status`**, **`data`**, **`headers`** — valide **`status`** antes de usar **`data`**.
 
-## Data Fetching: Server-side e Client-side
+## API gerada — se habilitar React Query no Orval
 
-- **PRIORIZE** fazer fetching de dados no server-side com o `fetch` e usar o resultado da resposta como `initialData` nos hooks gerados do TanStack Query.
-- Ao fazer data fetching no server-side, **SEMPRE** use as funções exportadas de @app/\_lib/api/fetch-generated/index.ts.
-- Ao fazer data-fetching no client-side, **SEMPRE** use os hooks exportados de @lib/api/rc-generated/index.ts.
+- Quando o output **`rc-generated`** (ou nome configurado) existir e exportar hooks **`use*`**:
+  - Em **Client Components**, **SEMPRE** use esses hooks para data fetching no cliente.
+  - **SEMPRE** chame a forma adequada da mutation e trate **`onSuccess`** / **`onError`** nos callbacks, não só `await` cego, quando o hook expuser esse padrão.
+  - **PRIORIZE** passar dados do servidor como **`initialData`** / **`placeholderData`** quando a página já tiver feito fetch no Server Component, para hidratar sem flash.
 
-Exemplo:
+Exemplo ilustrativo (só válido depois que os hooks existirem no arquivo gerado):
 
 ```tsx
 // page.tsx (Server Component)
-import { getHomeDate } from "@/lib/api/fetch-generated";
+import { getFoo } from "@/app/_lib/api/fetch-generated";
 
-const Home = async () => {
-  const data = await getHomeDate(new Date());
-
-  return <ClientComponent data={data} />;
-};
-
-export default Home;
-
-// client-component.tsx (Client Component)
-import { useGetHomeDate } from "@/lib/api/rc-generated";
-
-export const ClientComponent = (props) => {
-  const result = useGetHomeDate(props.today, {
-    query: { initialData: props.data },
-  });
-
-  return <></>;
-};
+export default async function Page() {
+  const res = await getFoo();
+  if (res.status !== 200) {
+    /* redirect ou error */
+  }
+  return <ClientBlock initial={res.data} />;
+}
 ```
+
+```tsx
+// client-block.tsx ("use client") — quando useGetFoo existir
+import { useGetFoo } from "@/app/_lib/api/rc-generated";
+
+export function ClientBlock({ initial }: { initial: Foo }) {
+  const { data } = useGetFoo({
+    query: { initialData: initial },
+  });
+  return <>{/* ... */}</>;
+}
+```
+
+## Sessão e páginas protegidas
+
+- **NUNCA** use **middleware** do Next só para exigir login; a verificação fica na **página** (ou layout de rota), conforme **`react.mdc`**.
+- **Cliente**: **`authClient.useSession()`** (ex.: guards como **`HomePageGuard`**).
+- **Servidor**: **`authClient.getSession({ fetchOptions: { headers: await headers() } })`**; normalize **`session?.user`** se o retorno vier como **`{ data: session }`**.
+- Sem usuário válido: **`redirect("/auth")`** (ou fluxo equivalente).
+- **`/auth`**: se já autenticado, redirecionar para **`/`** (ou destino padrão do produto).

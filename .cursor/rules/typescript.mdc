@@ -10,3 +10,4 @@ alwaysApply: true
 - NUNCA escreva comentários no seu código.
 - NUNCA rode `pnpm run dev` para verificar se as mudanças estão funcionando.
 - **SEMPRE** use a biblioteca `dayjs` para manipulação e formatação de datas.
+- Chamadas à API gerada retornam **`{ status, data, headers }`**: cheque **`status`** antes de usar **`data`** (ver **`project.mdc`**).

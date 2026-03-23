@@ -20,3 +20,7 @@ Você é um engenheiro de software sênior especializado em desenvolvimento web 
 
 - **SEMPRE** use o MCP do Context7 para fazer buscas em documentações e sites
 - **SEMPRE** use o Serena MCP para semantic code retrieval e editing tools
+
+## Front `fsc-treino-front`
+
+- Regras de estrutura, Orval, imports shadcn, contrato HTTP e padrões de feature estão em **`project.mdc`** (`alwaysApply: true`).

@@ -1,0 +1,76 @@
+---
+alwaysApply: true
+---
+
+## Escopo
+
+Regras do monólito **fsc-treino-front** (Next.js App Router, React 19). Valem para **qualquer** tela ou feature, não só a home. Complementam `general.mdc`, `typescript.mdc`, `react.mdc` e `auth.mdc`; em conflito de caminho de arquivo, **este repositório** prevalece.
+
+## Estrutura de pastas
+
+- **`app/(home)/`**: layout, **`globals.css`** da área principal, página **`/`** (`page.tsx`). Route group **`(home)`** não aparece na URL.
+- **`app/auth/`**: autenticação (ex.: `/auth`).
+- **`app/_components/`**: componentes por domínio (`home/`, `auth/`, …) e **`ui/`** (shadcn).
+- **`app/_lib/`**: **`auth-client`**, **`fetch.ts`** (mutator do Orval), **`utils`**, **`api/fetch-generated/`** (código gerado).
+- Tarefas / specs pontuais: pasta **`tasks/`** na raiz do front.
+
+## Alias de import
+
+- **`@/*`** mapeia para a raiz do projeto (`tsconfig`); use **`@/app/_components/...`**, **`@/app/_lib/...`**, etc.
+
+## shadcn/ui
+
+- **SEMPRE** importar de **`@/app/_components/ui/<nome>`**. Não use `@/components/ui` — não é o caminho deste repo.
+- Prefira compor telas com **Button**, **Card** (e slots header/title/action/content/footer), **Badge**, **Empty**, **Form**, **Input**, etc., antes de criar primitivos novos.
+- **SEMPRE** use **`Button`** para ações clicáveis; evite **`<button>`** nativo salvo exceção técnica documentada.
+
+## Organização de componentes
+
+- **Um componente React principal exportado por arquivo** (regra reforçada em `react.mdc`).
+- Agrupe por contexto: ex. **`app/_components/home/*`** para tudo que é específico da home; feature nova → nova pasta sob **`_components/`**.
+
+## API gerada (Orval)
+
+- Configuração: **`orval.config.ts`**. Saída ativa: **`app/_lib/api/fetch-generated/index.ts`**, client **`fetch`**, mutator **`customFetch`** em **`app/_lib/fetch.ts`**.
+- Regenerar tipos e funções: **`pnpm exec orval`** (ou **`npx orval`**) na raiz do front. Se o endpoint não existir após regenerar, **pare** e avise quem mantém a API/OpenAPI.
+- O mutator usa **`cookies()`** do Next — adequado a **Server Components** e chamadas autenticadas à API configurada em **`NEXT_PUBLIC_BETTER_AUTH_URL`** (base do `swagger.json` no Orval).
+
+## Contrato das funções `get*` / `list*` / mutações geradas
+
+- O retorno inclui **`status`**, **`data`** e **`headers`** (ver tipos `*Response` no arquivo gerado).
+- **SEMPRE** trate sucesso pelo **`status`** HTTP esperado (ex.: **`=== 200`**) antes de ler **`data`**. Não trate o retorno como se fosse só o DTO.
+- Tipos de payload de sucesso seguem o padrão exportado (ex.: **`GetHomeData200`**, **`ListWorkoutPlans200`**).
+
+## Onde buscar dados
+
+- **Primeira carga / SEO / menos JS**: **Server Component** + funções assíncronas exportadas de **`fetch-generated`**.
+- **Não** converta páginas inteiras em Client Component só para fetch que pode ocorrer no servidor.
+- **Client-side**: neste repo o bloco **`rc`** do Orval (React Query) está **desligado**. Opções: dados via **props** do servidor, **Server Actions**, **route handlers**, ou **habilitar** geração de hooks no Orval e aí seguir o padrão descrito em **`auth.mdc`** para TanStack Query.
+
+## Datas
+
+- **SEMPRE** use **dayjs** para formatar e calcular datas nos padrões do projeto (ex.: **`YYYY-MM-DD`** para chaves de API e mapas por dia).
+
+## Imagens
+
+- **SEMPRE** **`next/image`** quando for imagem otimizada; **`next.config.ts`** define **`remotePatterns`**.
+- URLs absolutas vindas da API podem exigir **`unoptimized`** temporariamente ou **novos `remotePatterns`** até o CDN/host final estar fechado.
+
+## Tema e estilo
+
+- Tokens e cores: **`app/(home)/globals.css`**. Respeite **`react.mdc`**: preferir variáveis de tema (`bg-primary`, `border-border`, …); estender o tema em vez de espalhar cores literais.
+
+## Padrões de domínio já usados (treinos / consistência)
+
+- Mapas por dia usam chave **`YYYY-MM-DD`**.
+- Estados de consistência típicos: **`workoutDayCompleted`**, **`workoutDayStarted`** — a UI diferencia “feito”, “só iniciado” e “não feito”.
+- Componentes reutilizáveis entre telas (ex.: badge de dia da semana do treino) ficam em **`_components/<área>/`** e exportam tipos alinhados aos gerados em **`fetch-generated`**.
+
+## Navegação e placeholders
+
+- Enquanto a rota não existir, **`Link`** pode usar **`href="#"`** com **`prefetch={false}`** e **`scroll={false}`** para não disparar navegação útil; substituir por **`href` real** na entrega da feature.
+- **Botões sem ação** só são aceitáveis como **placeholder explícito**; ao implementar a feature, conectar **`Link`** ou **`router`** ou handler.
+
+## Documentação viva
+
+- **`tasks/*.md`**: requisitos por entrega; após implementar, atualize regras aqui ou o próprio task se o contrato da API/UI mudar.
