@@ -12,8 +12,7 @@ interface BottomNavInnerProps {
 export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
   const pathname = usePathname() ?? "";
   const isHome = pathname === "/";
-  const isCalendar =
-    pathname.startsWith("/workout-plans/") && pathname.includes("/days/");
+  const isCalendar = pathname.startsWith("/workout-plans/");
 
   return (
     <div className="flex max-w-lg mx-auto items-end justify-between px-1">

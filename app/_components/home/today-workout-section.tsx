@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import {
   Card,
@@ -25,13 +26,29 @@ export function TodayWorkoutSection({
             Treino de Hoje
           </CardTitle>
           <CardAction>
-            <Button
-              type="button"
-              variant="link"
-              className="h-auto p-0 text-sm font-medium text-primary"
-            >
-              Ver treinos
-            </Button>
+            {todayWorkoutDay && !todayWorkoutDay.isRest ? (
+              <Button
+                variant="link"
+                className="h-auto p-0 text-sm font-medium text-primary"
+                asChild
+              >
+                <Link
+                  href={`/workout-plans/${todayWorkoutDay.workoutPlanId}`}
+                  prefetch={false}
+                >
+                  Ver treinos
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto p-0 text-sm font-medium text-muted-foreground"
+                disabled
+              >
+                Ver treinos
+              </Button>
+            )}
           </CardAction>
         </CardHeader>
         <CardContent className="p-3 sm:p-4">
