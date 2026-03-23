@@ -21,11 +21,13 @@ export function AuthPageContent() {
   const handleGoogleLogin = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
+      callbackURL: `${process.env.NEXT_PUBLIC_BASE_URL}`,
     });
 
     if (error) {
       toast.error(
-        error.message ?? "Não foi possível fazer login com o Google. Tente novamente."
+        error.message ??
+          "Não foi possível fazer login com o Google. Tente novamente.",
       );
     }
   };
