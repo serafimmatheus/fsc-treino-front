@@ -1,10 +1,13 @@
-import type { GetHomeData200TodayWorkoutDay } from "@/app/_lib/api/fetch-generated";
+import type {
+  GetHomeData200TodayWorkoutDay,
+  GetWorkoutDayById200WeekDay,
+} from "@/app/_lib/api/fetch-generated";
 import { Calendar } from "lucide-react";
 import { Badge } from "@/app/_components/ui/badge";
 
-export type WorkoutWeekDay = NonNullable<
-  GetHomeData200TodayWorkoutDay
->["weekDay"];
+export type WorkoutWeekDay =
+  | NonNullable<GetHomeData200TodayWorkoutDay>["weekDay"]
+  | GetWorkoutDayById200WeekDay;
 
 const WEEKDAY_LABEL: Record<WorkoutWeekDay, string> = {
   MONDAY: "SEGUNDA",
