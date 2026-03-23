@@ -1,14 +1,14 @@
 import { HomePageGuard } from "@/app/_components/home/home-page-guard";
 import { authClient } from "../_lib/auth-client";
-import { getHeaders } from "better-auth/react";
 import { redirect } from "next/navigation";
 import { getHomeData } from "../_lib/api/fetch-generated";
 import dayjs from "dayjs";
+import { headers } from "next/headers";
 
 export default async function Home() {
   const session = await authClient.getSession({
     fetchOptions: {
-      headers: await getHeaders(),
+      headers: await headers(),
     },
   });
 
