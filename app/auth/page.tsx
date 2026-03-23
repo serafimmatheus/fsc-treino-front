@@ -1,9 +1,5 @@
-const AuthPage = () => {
-  return (
-    <div>
-      <h1>Auth Page</h1>
-    </div>
-  );
-};
+import { AuthPageContent } from "@/components/auth/auth-page-content";
 
-export default AuthPage;
+export default function AuthPage() {
+  return <AuthPageContent />;
+}
