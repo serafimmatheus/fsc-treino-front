@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import Link from "next/link";
 import { Flame } from "lucide-react";
 import { Badge } from "@/app/_components/ui/badge";
 import { Button } from "@/app/_components/ui/button";
@@ -47,11 +48,11 @@ export function ConsistencySection({
           </CardTitle>
           <CardAction>
             <Button
-              type="button"
               variant="link"
               className="h-auto p-0 text-sm font-medium text-primary"
+              asChild
             >
-              Ver histórico
+              <Link href="/stats">Ver histórico</Link>
             </Button>
           </CardAction>
         </CardHeader>
