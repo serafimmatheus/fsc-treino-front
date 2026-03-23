@@ -9,7 +9,7 @@ import {
 } from "react-day-picker";
 
 import { cn } from "@/app/_lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/app/_components/ui/button";
 import {
   CaretLeftIcon,
   CaretRightIcon,
