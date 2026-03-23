@@ -12,6 +12,7 @@ interface BottomNavInnerProps {
 export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
   const pathname = usePathname() ?? "";
   const isHome = pathname === "/";
+  const isStats = pathname === "/stats";
   const isCalendar = pathname.startsWith("/workout-plans/");
 
   return (
@@ -70,10 +71,20 @@ export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
       </div>
       <Button
         variant="ghost"
-        className="h-auto min-h-12 flex-1 rounded-xl py-2 text-muted-foreground hover:bg-muted/60"
-        aria-label="Estatísticas"
+        className={
+          isStats
+            ? "h-auto min-h-12 flex-1 rounded-xl py-2 text-foreground hover:bg-muted/60 hover:text-foreground"
+            : "h-auto min-h-12 flex-1 rounded-xl py-2 text-muted-foreground hover:bg-muted/60"
+        }
+        asChild
       >
-        <BarChart3 className="size-7" strokeWidth={1.75} />
+        <Link
+          href="/stats"
+          aria-current={isStats ? "page" : undefined}
+          aria-label="Estatísticas"
+        >
+          <BarChart3 className="size-7" strokeWidth={1.75} />
+        </Link>
       </Button>
       <Button
         variant="ghost"
