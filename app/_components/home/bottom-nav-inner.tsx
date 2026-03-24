@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, Calendar, Home, Sparkles, User } from "lucide-react";
+import { useQueryStates } from "nuqs";
 import { Button } from "@/app/_components/ui/button";
+import { chatSearchParams } from "@/app/_lib/chat-search-params";
 
 interface BottomNavInnerProps {
   calendarHref: string;
@@ -11,8 +13,10 @@ interface BottomNavInnerProps {
 
 export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
   const pathname = usePathname() ?? "";
+  const [, setChat] = useQueryStates(chatSearchParams, { history: "push" });
   const isHome = pathname === "/";
   const isStats = pathname === "/stats";
+  const isProfile = pathname === "/profile";
   const isCalendar = pathname.startsWith("/workout-plans/");
 
   return (
@@ -61,10 +65,14 @@ export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
       )}
       <div className="flex flex-1 flex-col items-center justify-end -mt-5">
         <Button
+          type="button"
           variant="default"
           size="icon-lg"
           className="size-14 shrink-0 rounded-full shadow-lg [&_svg:not([class*='size-'])]:size-7"
-          aria-label="Ação principal"
+          aria-label="Abrir assistente FIT.AI"
+          onClick={() =>
+            void setChat({ chat_open: true, chat_initial_message: null })
+          }
         >
           <Sparkles className="size-7" strokeWidth={2} />
         </Button>
@@ -88,10 +96,20 @@ export function BottomNavInner({ calendarHref }: BottomNavInnerProps) {
       </Button>
       <Button
         variant="ghost"
-        className="h-auto min-h-12 flex-1 rounded-xl py-2 text-muted-foreground hover:bg-muted/60"
-        aria-label="Perfil"
+        className={
+          isProfile
+            ? "h-auto min-h-12 flex-1 rounded-xl py-2 text-foreground hover:bg-muted/60 hover:text-foreground"
+            : "h-auto min-h-12 flex-1 rounded-xl py-2 text-muted-foreground hover:bg-muted/60"
+        }
+        asChild
       >
-        <User className="size-7" strokeWidth={1.75} />
+        <Link
+          href="/profile"
+          aria-current={isProfile ? "page" : undefined}
+          aria-label="Perfil"
+        >
+          <User className="size-7" strokeWidth={1.75} />
+        </Link>
       </Button>
     </div>
   );

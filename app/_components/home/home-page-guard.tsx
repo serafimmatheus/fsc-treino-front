@@ -19,7 +19,15 @@ export function HomePageGuard({ children }: HomePageGuardProps) {
   }, [session, isPending, router]);
 
   if (isPending) {
-    return null;
+    return (
+      <div
+        className="flex min-h-dvh flex-1 items-center justify-center bg-background"
+        aria-busy="true"
+        aria-label="A carregar sessão"
+      >
+        <div className="size-9 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
   }
 
   if (!session) {

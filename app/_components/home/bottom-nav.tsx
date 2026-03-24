@@ -1,7 +1,17 @@
 import dayjs from "dayjs";
+import { Suspense } from "react";
 import { getHomeData } from "@/app/_lib/api/fetch-generated";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { BottomNavInner } from "./bottom-nav-inner";
+
+function BottomNavInnerFallback() {
+  return (
+    <div
+      className="mx-auto flex h-[3.25rem] max-w-lg items-end justify-between px-1"
+      aria-hidden
+    />
+  );
+}
 
 export async function BottomNav() {
   const homeRes = await getHomeData(dayjs().format("YYYY-MM-DD"));
@@ -20,7 +30,9 @@ export async function BottomNav() {
     >
       <Card className="gap-0 overflow-hidden rounded-none rounded-t-3xl border-x-0 border-b-0 py-0 shadow-[0_-8px_32px_-4px_rgba(0,0,0,0.08)] ring-1 ring-border/60">
         <CardContent className="px-2 pb-4 pt-3">
-          <BottomNavInner calendarHref={calendarHref} />
+          <Suspense fallback={<BottomNavInnerFallback />}>
+            <BottomNavInner calendarHref={calendarHref} />
+          </Suspense>
         </CardContent>
       </Card>
     </nav>

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { authClient } from "@/app/_lib/auth-client";
 import {
   getWorkoutPlanById,
@@ -48,12 +48,24 @@ export default async function WorkoutPlanPage({ params }: PageProps) {
 
   const res = await getWorkoutPlanById(workoutPlanId);
 
-  if (res.status === 404 || res.status === 403) {
+  if (res.status === 401) {
+    redirect("/auth");
+  }
+
+  if (res.status === 404) {
+    notFound();
+  }
+
+  if (res.status === 403) {
     redirect("/");
   }
 
-  if (res.status !== 200) {
-    redirect("/auth");
+  if (
+    res.status !== 200 ||
+    !res.data ||
+    !Array.isArray(res.data.workoutDays)
+  ) {
+    redirect("/");
   }
 
   const plan = res.data;

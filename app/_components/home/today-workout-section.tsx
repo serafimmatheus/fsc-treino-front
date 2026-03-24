@@ -18,6 +18,11 @@ interface TodayWorkoutSectionProps {
 export function TodayWorkoutSection({
   todayWorkoutDay,
 }: TodayWorkoutSectionProps) {
+  const todayDayHref =
+    todayWorkoutDay && !todayWorkoutDay.isRest
+      ? `/workout-plans/${todayWorkoutDay.workoutPlanId}/days/${todayWorkoutDay.id}`
+      : null;
+
   return (
     <section className="px-4 pb-6">
       <Card className="gap-0 overflow-hidden rounded-2xl border-border/80 py-0 shadow-md ring-1 ring-border/40">
@@ -26,16 +31,13 @@ export function TodayWorkoutSection({
             Treino de Hoje
           </CardTitle>
           <CardAction>
-            {todayWorkoutDay && !todayWorkoutDay.isRest ? (
+            {todayDayHref ? (
               <Button
                 variant="link"
                 className="h-auto p-0 text-sm font-medium text-primary"
                 asChild
               >
-                <Link
-                  href={`/workout-plans/${todayWorkoutDay.workoutPlanId}`}
-                  prefetch={false}
-                >
+                <Link href={todayDayHref} prefetch={false}>
                   Ver treinos
                 </Link>
               </Button>

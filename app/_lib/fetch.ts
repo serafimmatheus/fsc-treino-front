@@ -1,15 +1,22 @@
 import { cookies } from "next/headers";
 
-const getBody = <T>(c: Response | Request): Promise<T> => {
-  return c.json() as Promise<T>;
+const getBody = async <T>(response: Response): Promise<T> => {
+  const text = await response.text();
+  if (!text.trim()) {
+    return null as T;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null as T;
+  }
 };
 
 const getUrl = (contextUrl: string): string => {
-  const newUrl = new URL(
-    `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}${contextUrl}`,
-  );
-  const requestUrl = new URL(`${newUrl}`);
-  return requestUrl.toString();
+  const base =
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:5555";
+  const path = contextUrl.startsWith("/") ? contextUrl : `/${contextUrl}`;
+  return new URL(path, base).toString();
 };
 
 const getHeaders = async (headers?: HeadersInit): Promise<HeadersInit> => {

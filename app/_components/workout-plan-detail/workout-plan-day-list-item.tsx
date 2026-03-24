@@ -10,6 +10,13 @@ import { cn } from "@/app/_lib/utils";
 const FALLBACK_COVER =
   "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=400&q=80";
 
+function coverImageSrc(url: string | null | undefined): string {
+  const t = url?.trim();
+  if (!t) return FALLBACK_COVER;
+  if (t.startsWith("https://") || t.startsWith("http://")) return t;
+  return FALLBACK_COVER;
+}
+
 function formatMinutes(seconds: number) {
   const m = Math.max(1, Math.round(seconds / 60));
   return `${m}min`;
@@ -25,6 +32,7 @@ export function WorkoutPlanDayListItem({
   day,
 }: WorkoutPlanDayListItemProps) {
   const href = `/workout-plans/${workoutPlanId}/days/${day.id}`;
+  const imageSrc = coverImageSrc(day.coverImageUrl);
 
   return (
     <Link
@@ -45,12 +53,12 @@ export function WorkoutPlanDayListItem({
             )}
           >
             <Image
-              src={day.coverImageUrl ?? FALLBACK_COVER}
+              src={imageSrc}
               alt=""
               fill
               className="object-cover object-center"
               sizes="120px"
-              unoptimized={Boolean(day.coverImageUrl)}
+              unoptimized={imageSrc !== FALLBACK_COVER}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
             <div className="absolute left-2 top-2">

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { Dumbbell, Timer } from "lucide-react";
 import { authClient } from "@/app/_lib/auth-client";
 import { getWorkoutDayById } from "@/app/_lib/api/fetch-generated";
@@ -17,6 +18,13 @@ import { WorkoutDayExerciseRow } from "@/app/_components/workout-day-detail/work
 
 const FALLBACK_COVER =
   "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=1200&q=80";
+
+function coverImageSrc(url: string | null | undefined): string {
+  const t = url?.trim();
+  if (!t) return FALLBACK_COVER;
+  if (t.startsWith("https://") || t.startsWith("http://")) return t;
+  return FALLBACK_COVER;
+}
 
 function formatMinutes(seconds: number) {
   const m = Math.max(1, Math.round(seconds / 60));
@@ -60,17 +68,31 @@ export default async function WorkoutDayPage({ params }: PageProps) {
 
   const res = await getWorkoutDayById(workoutPlanId, workoutDayId);
 
-  if (res.status === 404 || res.status === 403) {
+  if (res.status === 401) {
+    redirect("/auth");
+  }
+
+  if (res.status === 404) {
+    notFound();
+  }
+
+  if (res.status === 403) {
     redirect("/");
   }
 
-  if (res.status !== 200) {
-    redirect("/auth");
+  if (
+    res.status !== 200 ||
+    !res.data ||
+    !Array.isArray(res.data.sessions) ||
+    !Array.isArray(res.data.exercises)
+  ) {
+    redirect("/");
   }
 
   const day = res.data;
   const { hasCompletedSession, activeSessionId } = sessionState(day.sessions);
   const exercises = [...day.exercises].sort((a, b) => a.order - b.order);
+  const heroImageSrc = coverImageSrc(day.coverImageUrl);
 
   return (
     <HomePageGuard>
@@ -80,13 +102,13 @@ export default async function WorkoutDayPage({ params }: PageProps) {
           <Card className="gap-0 overflow-hidden rounded-2xl border-border/80 py-0 shadow-md ring-1 ring-border/40">
             <div className="relative aspect-16/10 w-full">
               <Image
-                src={day.coverImageUrl ?? FALLBACK_COVER}
+                src={heroImageSrc}
                 alt=""
                 fill
                 className="object-cover object-center"
                 sizes="(max-width: 768px) 100vw, 480px"
                 priority
-                unoptimized={Boolean(day.coverImageUrl)}
+                unoptimized={heroImageSrc !== FALLBACK_COVER}
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/88 via-black/35 to-black/50" />
               <div className="absolute left-3 top-3">
@@ -131,13 +153,26 @@ export default async function WorkoutDayPage({ params }: PageProps) {
                 </EmptyTitle>
               </Empty>
             ) : (
-              <ul className="flex flex-col gap-2">
-                {exercises.map((exercise) => (
-                  <li key={exercise.id}>
-                    <WorkoutDayExerciseRow exercise={exercise} />
-                  </li>
-                ))}
-              </ul>
+              <Suspense
+                fallback={
+                  <ul className="flex flex-col gap-2">
+                    {exercises.map((exercise) => (
+                      <li
+                        key={exercise.id}
+                        className="h-[4.5rem] animate-pulse rounded-xl bg-muted/40"
+                      />
+                    ))}
+                  </ul>
+                }
+              >
+                <ul className="flex flex-col gap-2">
+                  {exercises.map((exercise) => (
+                    <li key={exercise.id}>
+                      <WorkoutDayExerciseRow exercise={exercise} />
+                    </li>
+                  ))}
+                </ul>
+              </Suspense>
             )}
           </section>
 

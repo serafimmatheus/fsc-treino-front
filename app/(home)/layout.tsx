@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next";
 import "./globals.css";
 import { cn } from "@/app/_lib/utils";
+import { FitAiChatRoot } from "@/app/_components/chat/fit-ai-chat-root";
 import { Toaster } from "@/app/_components/ui/sonner";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -41,8 +44,15 @@ export default function RootLayout({
         jetbrainsMono.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">
-        {children}
+      <body className="min-h-dvh flex flex-col bg-background">
+        <NuqsAdapter>
+          <div className="flex min-h-dvh w-full flex-1 flex-col">
+            {children}
+            <Suspense fallback={null}>
+              <FitAiChatRoot />
+            </Suspense>
+          </div>
+        </NuqsAdapter>
         <Toaster />
       </body>
     </html>
